@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            background:url("img/timg.jpg") no-repeat;
+
+        }
+        .box{
+            width:600px;
+            padding: 20px;
+            border:3px darkgoldenrod solid;
+            margin: 50px auto;
+            font-size: 13px;
+            font-weight:bold;
+            color: forestgreen;
+        }
+        .ctr-box{
+            width: 100%;
+            display: flex;
+        }
+        .ctr-pic{
+            width: 150px;
+        }
+        .ctr-pic img{
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+        }
+        .ctr-body{
+            width: 100%;
+            height: 150px;
+        }
+        .singer{
+            margin: 30px 0 0 30px;
+        }
+        .bar{
+            width:300px ;
+            position: relative;
+            margin: 15px;
+        }
+        .total{
+            width:200px ;
+            height: 4px;
+            background-color: red;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .volume-total{
+            width:100px ;
+            height: 4px;
+            background-color: red;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .now{
+            width: 0px;
+            height: 4px;
+            background-color: blue;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .ctr-bar{
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #1ea93b;
+            position: absolute;
+            top: -3px;
+            left: 0;
+            transition: left 0.1s linear 0s;
+        }
+        .volume-bar{
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #1ea93b;
+            position: absolute;
+            top: -4px;
+            left: 0;
+        }
+        .time{
+            position: absolute;
+            top: -6px;
+            right: 0;
+        }
+        .ctr-btn{
+            width: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 35px 20px 20px 20px;
+        }
+        .ctr-btn .prev,.start,.next,.volume,.mode{
+            background: url("img/player.png") no-repeat;
+        }
+        .ctr-btn .prev{
+            width: 20px;
+            height: 20px;
+            background-position-y:-30px;
+        }
+        .ctr-btn .start{
+            width: 20px;
+            height: 30px;
+
+        }
+        .ctr-btn .next{
+            width: 20px;
+            height: 20px;
+            background-position-y:-52px;
+        }
+        .ctr-btn  .volume{
+            width: 30px;
+            height: 25px;
+            background-position-y: -141px;
+        }
+        .ctr-btn .mode{
+            width: 28px;
+            height: 23px;
+            background-position-y: -206px;
+        }
+        .list-box{
+            width: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        ul li{
+            height: 30px;
+            line-height: 30px;
+            list-style: none;
+            border-bottom: 1px dashed red;
+            display: flex;
+            justify-content: space-between;
+        }
+        .bar-box{
+            width: 200px;
+            height: 6px;
+        }
+        .volumeBox{
+            width: 100px;
+            height: 6px;
+            position: relative;
+            right: 15px;
+        }
+        .active {
+            background-color: #ccc;
+        }
+.bot{
+    width: 150px;
+    margin: 0 auto;
+}
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="bot">
+        <input type="text" id="searchTxt">
+        <button id="searchBtn">歌曲搜索</button>
+    </div>
+<div class="ctr-box">
+    <div class="ctr-pic">
+        <img src="" alt="">
+    </div>
+    <div class="ctr-body">
+<div class="singer">
+<span></span>
+</div>
+
+        <div class="bar">
+            <div class="bar-box">
+            <div class="total"></div>
+            <div class="now"></div>
+            <div class="ctr-bar"></div>
+            </div>
+            <p class="time">
+                <span class="current">00:00</span>
+                /
+                <span class="duration">00:00</span>
+            </p>
+        </div>
+        <div class="ctr-btn">
+            <div class="prev"></div>
+            <div class="start"></div>
+            <div class="next"></div>
+            <div class="volume"></div>
+            <div class="volumeBox">
+                <div class="volume-total">
+                <div class="volume-bar"></div>
+                </div>
+            </div>
+            <div class="mode"></div>
+        </div>
+
+    </div>
+
+</div>
+<div class="list-box">
+    <ul>
+    </ul>
+</div>
+</div>
+<audio></audio>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    var data = [];
+    var audio = document.querySelector('audio');
+    var pic = document.querySelector('.ctr-pic img');
+    var singer = document.querySelector('.singer span');
+    var start = document.querySelector('.ctr-btn .start');
+    var index = 0;
+    var rotateDeg = 0;
+    var timer = null;
+    var prev = document.querySelector('.ctr-btn .prev');
+    var next = document.querySelector('.ctr-btn .next');
+    var currentTime = document.querySelector('.time .current');
+    var durationTime = document.querySelector('.time .duration');
+    var barBox = document.querySelector('.bar-box');
+    var ctrBar = document.querySelector('.ctr-bar');
+    var now = document.querySelector('.now');
+    var modeBtn = document.querySelector('.mode');
+    var listBox = document.querySelector('.list-box ul');
+    var volumeBtn = document.querySelector('.volume');
+    var volumeb = 0;
+    var volumeArr=[-141,-180];
+    var mode =0;
+    var modeArr=[-206,-73,-233];
+    var volumeBox = document.querySelector('.volumeBox');
+    var volumeTotal = document.querySelector('.volume-total');
+    var volumeBar = document.querySelector('.volume-bar');
+    var boxL,newL,moveL,mouseX,leftL;
+    var cha = volumeTotal.offsetWidth - volumeBar.offsetWidth;
+    var indexTwo = 0;
+    var searchTxt = document.querySelector('#searchTxt');
+    var searchBtn = document.querySelector('#searchBtn');
+    var lis = null;
+    //console.log(audio);
+    searchBtn.addEventListener('click',function () {
+        $.ajax({
+            url: 'https://api.imjad.cn/cloudmusic/',
+            data: {
+                type: 'search',
+                s: searchTxt.value
+            },
+            type: 'get',
+            success: function (data1) {
+                data = data1.result.songs;
+                console.log(data);
+                var str = '';
+                for(var i = 0; i < data.length; i++){
+                        str += '<li><span>'+data[i].name+'</span><span>';
+                        for(var j = 0;j<data[i].ar.length;j++){
+                            str +=data[i].ar[j].name+' '
+                        }
+                        str +='</span></li>'
+                }
+                listBox.innerHTML = str;
+                lis = document.querySelectorAll('li');
+
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+    volumeBtn.addEventListener('click',function () {
+        volumeb = ++volumeb > volumeArr.length -1 ? 0 :volumeb;
+        volumeBtn.style.backgroundPositionY = volumeArr[volumeb]+'px';
+        switch (volumeb) {
+            case 0:
+                audio.volume = 1.0;
+                break;
+            case 1:
+                audio.volume = 0.0;
+                break;
+        }
+    });
+
+    $('ul').on('click','li',function () {
+         index = $(this).index();
+         audio.src ='http://music.163.com/song/media/outer/url?id='+data[index].id+'.mp3';
+         init();
+         play();
+});
+
+   /* for(var i = 0; i < data.length; i++){
+        lis[i].index = i;
+        lis[i].addEventListener('click',function () {
+            // 先知道我点的哪一个li
+            // this就是那个li 但是是第几个
+            index = this.index;
+            init();
+            play();
+
+        });
+    }*/
+function init() {
+    // 初始化专辑封面，歌手歌曲名，播放路径，播放时间
+    rotateDeg = 0;
+    //pic.src = data[index].picture;
+    var songStr = '';
+    for (var j= 0;j < data[index].ar.length;j++) {
+        songStr += data[index].ar[j].name + ' ';
+    }
+    singer.innerHTML =data[index].name + '---'+ songStr;
+    // 切换列表选中项
+    for(var i = 0; i < data.length; i++){
+       lis[i].className = '';
+    }
+
+    lis[index].className = 'active';
+}
+function play(){
+    pic.src = data[index].al.picUrl;
+    audio.play();
+    start.style.backgroundPositionX=-30 + 'px';
+    clearInterval(timer);
+    timer = setInterval(function () {
+        rotateDeg++;
+        pic.style.transform = 'rotate('+rotateDeg+'deg)';
+    },30);
+}
+    start.addEventListener('click',function () {
+        if (audio.paused){
+                play();
+        }else {
+            audio.pause();
+            start.style.backgroundPositionX=0 + 'px';
+            clearInterval(timer);
+        }
+    });
+    prev.addEventListener('click',function () {
+       index--;
+       index = index<0 ? data.length-1:index;
+        audio.src ='http://music.163.com/song/media/outer/url?id='+data[index].id+'.mp3';
+       init();
+       play();
+    });
+    next.addEventListener('click',function () {
+        //index = $('li').index();
+        //index+1;
+        index++;
+        index = index>data.length-1? 0:index;
+        audio.src ='http://music.163.com/song/media/outer/url?id='+data[index].id+'.mp3';
+        init();
+        play();
+    })
+audio.addEventListener('canplay',function () {
+    var min = parseInt(audio.duration/60);
+    var se = parseInt(audio.duration%60);
+    durationTime.innerHTML = formatTime(min)+':'+formatTime(se);
+
+    audio.addEventListener('timeupdate',function () {
+        var currentMin = parseInt(audio.currentTime/60);
+        var currentSe = parseInt(audio.currentTime%60);
+        currentTime.innerHTML=formatTime(currentMin)+':'+formatTime(currentSe);
+        var left = audio.currentTime / audio.duration * barBox.clientWidth;
+        ctrBar.style.left=left+ 'px';
+        now.style.width=left+ 'px';
+        if (audio.ended){
+            switch (mode) {
+                case 0:
+                    index++;
+                    index = index>data.length-1? 0:index;
+                    init();
+                    play();
+                    break;
+                case 1:
+                    init();
+                    play();
+                    break;
+                case 2:
+                    // 递归算法
+                    function getRandom() {
+                        var randomNum = Math.floor(Math.random() * data.length);
+                        if (index == randomNum){
+                            randomNum = getRandom();
+                        }
+                        return randomNum;
+                    }
+                    index = getRandom();
+                    init();
+                    play();
+                    break;
+            }
+            index++;
+            index = index>data.length-1? 0:index;
+            init();
+            play();
+        }
+    });
+    barBox.addEventListener('click',function (e) {
+        audio.currentTime = e.offsetX/barBox.clientWidth*audio.duration;
+    });
+});
+    modeBtn.addEventListener('click',function () {
+
+        mode = ++mode > modeArr.length -1 ? 0 :mode;
+        modeBtn.style.backgroundPositionY = modeArr[mode]+'px';
+    })
+    function formatTime(time) {
+        return time >9 ? time : '0'+time;
+    }
+
+</script>
+</html>
